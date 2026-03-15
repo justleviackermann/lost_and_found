@@ -4,12 +4,19 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.OffsetDateTime;
 
 @Entity
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserProfile {
 @GeneratedValue
     @Id
@@ -17,11 +24,13 @@ public class UserProfile {
 
 
 @Column(unique = true)
-@NotNull
+@NotNull(message = "Regno already exists")
+
     private Long regNo;
 
-@Column(columnDefinition = "Varchar(10) Default 'Student' ")
-    private String role;
+@Enumerated(EnumType.STRING)
+@Column(columnDefinition = "varchar(10) ", nullable = false)
+    private Role role=Role.student;
 
 @NotBlank
     private String name;
@@ -31,7 +40,7 @@ public class UserProfile {
     private String email;
 
 @NotNull
-    private int studyYear; //year of study
+    private Integer studyYear; //year of study
 
     @NotBlank
     private String password;
