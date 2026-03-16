@@ -13,4 +13,5 @@ public interface UserProfileRepo extends JpaRepository<UserProfile,Long> {
     Optional<UserProfile> findByregNo(Long id);
 
     Boolean existsByRegNo(Long regNo);
+    Optional<UserProfile> findByEmail(String a);
 }

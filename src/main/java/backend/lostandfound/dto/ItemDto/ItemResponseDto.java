@@ -20,4 +20,6 @@ public class ItemResponseDto {
     private OffsetDateTime reportedAt;
     private Boolean isResolved;
     private OffsetDateTime resolvedAt;
+    private String location;
+    private String imageUrl;
 }

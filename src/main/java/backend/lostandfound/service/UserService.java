@@ -1,18 +1,25 @@
 package backend.lostandfound.service;
 
 import backend.lostandfound.Exception.DuplicateRegNoException;
+import backend.lostandfound.Exception.PasswordNotMatchException;
 import backend.lostandfound.Exception.SamePasswordException;
 import backend.lostandfound.Exception.UserNotFoundException;
 import backend.lostandfound.dto.UserDto.CreateUserDto;
+import backend.lostandfound.dto.UserDto.Login;
 import backend.lostandfound.dto.UserDto.UserResponseDto;
 import backend.lostandfound.model.Role;
 import backend.lostandfound.model.UserProfile;
 import backend.lostandfound.repo.UserProfileRepo;
+import backend.lostandfound.security.JwtUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +27,7 @@ public class UserService {
     private final UserProfileRepo userProfileRepo;
 
     private  final PasswordEncoder passwordEncoder;
+    private final JwtUtils jwtUtils;
 
 //for the sake of safety creating dto
     public UserResponseDto createUser(CreateUserDto userDto) {
@@ -54,7 +62,13 @@ public void deleteUser(Long id) throws  UserNotFoundException{
 
 
 }
-
+public Map<String,String> loginser(Login login) throws PasswordNotMatchException{
+UserProfile user=userProfileRepo.findByEmail(login.getEmail()).orElseThrow(()->new UserNotFoundException(login.getEmail()+ " not found"));
+if(!passwordEncoder.matches(login.getPassword() , user.getPassword()))
+throw new PasswordNotMatchException("Given password is incorrect");
+String token= jwtUtils.generateToken(login.getEmail(), user.getRegNo());
+return Map.of("token",token);
+}
 public List<UserResponseDto> listall(){
 //        List<UserProfile> user=userProfileRepo.findAll();
 //        List<UserResponseDto> responseUserProfile=new ArrayList<>();
@@ -88,6 +102,15 @@ public UserResponseDto updateUser(Long id,CreateUserDto newUser){
 return(mapToResponse(userProfileRepo.save(user)));
 
 }
+
+    public Page<UserResponseDto> getAllUsersByPages(int page, int size){
+        Pageable pageable= PageRequest.of(page,size);
+        Page<UserProfile> userPage=userProfileRepo.findAll(pageable);
+        return userPage.map(this::mapToResponse)  ;
+
+    }
+
+
     private UserResponseDto mapToResponse(UserProfile user){
         return UserResponseDto.builder()
                 .id(user.getId())

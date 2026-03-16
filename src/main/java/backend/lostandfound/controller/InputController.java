@@ -11,6 +11,7 @@ import backend.lostandfound.service.ItemService;
 import backend.lostandfound.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -47,6 +48,14 @@ public class InputController {
 return new ResponseEntity<>(itemService.updateItem(id, item),HttpStatus.OK);
     }
 
+@GetMapping("/listall")
+    public ResponseEntity<List<ItemResponseDto>> listall(){
+        return new ResponseEntity<>(itemService.displayAll(),HttpStatus.OK);
+}
 
+@GetMapping("listallbypages")
+    public ResponseEntity<Page<ItemResponseDto>> listbypages(@RequestParam int page,@RequestParam int size){
+        return new ResponseEntity<>(itemService.getAllItemsByPages(page,size),HttpStatus.OK);
+}
 
 }

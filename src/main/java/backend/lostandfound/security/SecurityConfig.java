@@ -6,6 +6,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 public class SecurityConfig {
@@ -15,13 +16,20 @@ return new BCryptPasswordEncoder();
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtFilter jwtFilter) throws Exception {
         http
                 .csrf(csrf -> csrf.disable()) // Disable CSRF for testing with Postman
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/**").permitAll() // Replace with your actual path
-                        .anyRequest().authenticated() // Everything else still needs a login
-                );
+
+                                .requestMatchers("/admin/login").permitAll()
+                                .requestMatchers("/main/listallbypages").permitAll()
+                                .requestMatchers("admin/create").permitAll()
+                                .anyRequest().authenticated()
+                        // Replace with your actual path
+
+                        // Everything else still needs a login
+                ).addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+
 
         return http.build();
     }

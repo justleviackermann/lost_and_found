@@ -1,15 +1,19 @@
 package backend.lostandfound.controller;
 
+import backend.lostandfound.dto.ItemDto.ItemResponseDto;
 import backend.lostandfound.dto.UserDto.CreateUserDto;
+import backend.lostandfound.dto.UserDto.Login;
 import backend.lostandfound.dto.UserDto.UserResponseDto;
 import backend.lostandfound.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/admin")
@@ -25,6 +29,11 @@ public class UserController {
         return new ResponseEntity<>(
 
                 userService.createUser(userDto), HttpStatus.CREATED);
+    }
+    @PostMapping("/login")
+    public ResponseEntity<Map<String,String>> login(@RequestBody Login login){
+        return new ResponseEntity<>(userService.loginser(login),HttpStatus.OK);
+
     }
 
     @GetMapping("/{id}")
@@ -62,6 +71,11 @@ public class UserController {
     public ResponseEntity<UserResponseDto> updateUser(@PathVariable Long id,@Valid @RequestBody CreateUserDto user){
         return new ResponseEntity<>(userService.updateUser(id,user),HttpStatus.OK);
 
+    }
+
+        @GetMapping("listallbypages")
+    public ResponseEntity<Page<UserResponseDto>> listbypages(@RequestParam int page, @RequestParam int size){
+        return new ResponseEntity<>(userService.getAllUsersByPages(page,size),HttpStatus.OK);
     }
 
 }

@@ -23,7 +23,10 @@ public class CreateItemDto {
     @NotNull(message = "Reporter registration number is required")
     private Long reporterRegNo;
 
-    @NotNull
+    @NotNull(message = "cant be null")
     private Boolean isResolved;
 
+    @NotBlank(message = "cant be empty")
+    private String location;
+    private String imageUrl;
 }

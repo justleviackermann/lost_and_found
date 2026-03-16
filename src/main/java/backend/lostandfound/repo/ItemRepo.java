@@ -9,4 +9,5 @@ import java.util.Optional;
 public interface ItemRepo extends JpaRepository<ItemTable,Long> {
     @Override
     Optional<ItemTable> findById(Long aLong);
+
 }

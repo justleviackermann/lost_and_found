@@ -49,5 +49,8 @@ public class ItemTable {
     @Column(columnDefinition = "TimeStamp with Time Zone")
     private OffsetDateTime resolvedAt;
 
+    @NotBlank
+    private String itemLocation;
+    private String imageUrl;
 
 }

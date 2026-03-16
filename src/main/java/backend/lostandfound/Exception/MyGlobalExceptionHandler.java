@@ -59,6 +59,18 @@ public class MyGlobalExceptionHandler {
 
 
     }
+    @ExceptionHandler(PasswordNotMatchException.class)
+    public ResponseEntity<Object> handlePasswordNotMatch(PasswordNotMatchException ex,WebRequest request){
+
+        Map<String,Object> body=new LinkedHashMap<>();
+        body.put("timestamp",LocalDateTime.now());
+        body.put("status",HttpStatus.UNAUTHORIZED.value());
+        body.put("error","Passwords are different-Invalid User");
+        body.put("message",ex.getMessage());
+        body.put("path",request.getDescription(false));
+        return new ResponseEntity<>(body,HttpStatus.UNAUTHORIZED);
+
+    }
 
 
 

@@ -10,9 +10,13 @@ import backend.lostandfound.repo.ItemRepo;
 import backend.lostandfound.repo.UserProfileRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Locale;
 
 @Service
@@ -24,6 +28,7 @@ private final UserProfileRepo userProfileRepo;
 
 public ItemResponseDto createItem (CreateItemDto item)throws UserNotFoundException
 {
+   item.setIsResolved(false);
 return mapToResponseDto(itemRepo.save(mapFromCreateItem(item)));
 
 
@@ -52,9 +57,24 @@ public void deleteItem(Long id) throws UserNotFoundException{
    item.setItemDesc(newItem.getItemDesc());
    item.setStatus(Status.valueOf((newItem.getStatus().toLowerCase())));
    item.setIsResolved( newItem.getIsResolved());
+   if(newItem.getIsResolved())
+      item.setResolvedAt(OffsetDateTime.now());
+else item.setResolvedAt(null);
+
    return(mapToResponseDto(itemRepo.save(item)));
 
    }
+
+   public List<ItemResponseDto> displayAll(){
+   return itemRepo.findAll().stream().map(this::mapToResponseDto).toList();
+   }
+
+public Page<ItemResponseDto> getAllItemsByPages(int page,int size){
+   Pageable pageable= PageRequest.of(page,size);
+   Page<ItemTable> itemPage=itemRepo.findAll(pageable);
+   return itemPage.map(this::mapToResponseDto)  ;
+
+}
    private ItemTable mapFromCreateItem (CreateItemDto item) throws UserNotFoundException
    {
       UserProfile user =userProfileRepo.findByregNo(item.getReporterRegNo()).orElseThrow(() -> new UserNotFoundException(item.getReporterRegNo() +" User not found"));
@@ -66,6 +86,8 @@ public void deleteItem(Long id) throws UserNotFoundException{
            .status(Status.valueOf(item.getStatus().toLowerCase(Locale.ROOT)))
            .isResolved(item.getIsResolved())
            .userProfile(user)
+           .itemLocation(item.getLocation())
+           .imageUrl(item.getImageUrl())
            .build();
 
 }
@@ -81,6 +103,8 @@ private ItemResponseDto mapToResponseDto(ItemTable item){
            .reporterName(item.getUserProfile().getName())
            .reportedAt(item.getReportedAt())
            .resolvedAt(item.getResolvedAt())
+           .location(item.getItemLocation())
+           .imageUrl(item.getImageUrl())
            .build();
 
 
