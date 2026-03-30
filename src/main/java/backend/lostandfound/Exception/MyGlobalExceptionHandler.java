@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
+import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -71,7 +72,16 @@ public class MyGlobalExceptionHandler {
         return new ResponseEntity<>(body,HttpStatus.UNAUTHORIZED);
 
     }
-
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Object> handleAccessDenied(AccessDeniedException ex,WebRequest request){
+        Map<String,Object> body=new LinkedHashMap<>();
+        body.put("timestamp",LocalDateTime.now());
+        body.put("status",HttpStatus.FORBIDDEN.value());
+        body.put("error","Access Denied");
+        body.put("message",ex.getMessage());
+        body.put("path",request.getDescription(false));
+        return new ResponseEntity<>(body,HttpStatus.FORBIDDEN);
+    }
 
 
 }

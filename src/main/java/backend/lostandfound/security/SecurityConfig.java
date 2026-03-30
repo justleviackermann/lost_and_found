@@ -2,6 +2,8 @@ package backend.lostandfound.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -9,6 +11,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
+@EnableMethodSecurity
 public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder(){
@@ -20,10 +23,17 @@ return new BCryptPasswordEncoder();
         http
                 .csrf(csrf -> csrf.disable()) // Disable CSRF for testing with Postman
                 .authorizeHttpRequests(auth -> auth
+                                .requestMatchers("/user/create", "/user/login").permitAll()
 
-                                .requestMatchers("/admin/login").permitAll()
-                                .requestMatchers("/main/listallbypages").permitAll()
-                                .requestMatchers("admin/create").permitAll()
+                                // public item routes
+                                .requestMatchers(HttpMethod.GET,
+                                        "/main/listall",
+                                        "/main/listallbypages",
+                                        "/main/"
+                                ).permitAll()
+
+
+
                                 .anyRequest().authenticated()
                         // Replace with your actual path
 

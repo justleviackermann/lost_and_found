@@ -37,6 +37,7 @@ public class UserProfile {
 
 @Email
 @NotNull
+@Column(unique = true)
     private String email;
 
 @NotNull

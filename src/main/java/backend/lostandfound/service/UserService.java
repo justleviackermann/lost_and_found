@@ -15,9 +15,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import org.springframework.security.access.AccessDeniedException;
 import java.util.List;
 import java.util.Map;
 
@@ -62,11 +64,32 @@ public void deleteUser(Long id) throws  UserNotFoundException{
 
 
 }
+
+    public void deleteUserfoorUser(Long id) throws  UserNotFoundException,AccessDeniedException{
+
+        String username = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
+        UserProfile user=userProfileRepo.findById(id).orElseThrow(()->new UserNotFoundException(id+ "User not found"));
+        if(!user.getEmail().equals(username)){
+            throw new AccessDeniedException(
+                    "You can delete only your own profile"
+            );
+        }
+        userProfileRepo.delete(user);
+
+
+
+
+
+
+    }
 public Map<String,String> loginser(Login login) throws PasswordNotMatchException{
 UserProfile user=userProfileRepo.findByEmail(login.getEmail()).orElseThrow(()->new UserNotFoundException(login.getEmail()+ " not found"));
 if(!passwordEncoder.matches(login.getPassword() , user.getPassword()))
 throw new PasswordNotMatchException("Given password is incorrect");
-String token= jwtUtils.generateToken(login.getEmail(), user.getRegNo());
+String token= jwtUtils.generateToken(login.getEmail(), user.getRegNo(),user.getRole());
 return Map.of("token",token);
 }
 public List<UserResponseDto> listall(){
@@ -102,6 +125,25 @@ public UserResponseDto updateUser(Long id,CreateUserDto newUser){
 return(mapToResponse(userProfileRepo.save(user)));
 
 }
+
+    public UserResponseDto updateUserforUser(Long id,CreateUserDto newUser){
+        String username = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
+        if(!newUser.getEmail().equals(username)){
+            throw new AccessDeniedException(
+                    "You can delete only your own profile"
+            );
+        }
+        UserProfile user=userProfileRepo.findById(id).orElseThrow(()->new UserNotFoundException(id+ "User not found"));
+        user.setName(newUser.getName());
+        user.setEmail(newUser.getEmail());
+        user.setStudyYear(newUser.getStudyYear());
+
+        return(mapToResponse(userProfileRepo.save(user)));
+
+    }
 
     public Page<UserResponseDto> getAllUsersByPages(int page, int size){
         Pageable pageable= PageRequest.of(page,size);

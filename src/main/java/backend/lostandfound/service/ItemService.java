@@ -13,12 +13,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Locale;
-
+import org.springframework.security.access.AccessDeniedException;
 @Service
 @RequiredArgsConstructor
 public class ItemService {
@@ -47,6 +48,22 @@ public void deleteItem(Long id) throws UserNotFoundException{
    itemRepo.delete(item);
 
 }
+   public void deleteItemforUsers(Long id) throws UserNotFoundException{
+      ItemTable item=itemRepo.findById(id).orElseThrow(()->new UserNotFoundException(id + "item not found"));
+      String username = SecurityContextHolder
+              .getContext()
+              .getAuthentication()
+              .getName();
+      UserProfile user=userProfileRepo.findById(id).orElseThrow(()->new UserNotFoundException(id+ "User not found"));
+      if (!user.getEmail().equals(username)) {
+         throw new AccessDeniedException(
+                 "You can delete only your own item"
+         );
+      }
+      itemRepo.delete(item);
+
+   }
+
 
    public ItemResponseDto updateItem (Long id,CreateItemDto newItem)throws UserNotFoundException{
 
@@ -62,6 +79,34 @@ public void deleteItem(Long id) throws UserNotFoundException{
 else item.setResolvedAt(null);
 
    return(mapToResponseDto(itemRepo.save(item)));
+
+   }
+
+
+   public ItemResponseDto updateItemforUsers (Long id,CreateItemDto newItem)throws UserNotFoundException{
+
+      ItemTable item=itemRepo.findById(id).orElseThrow(()->new UserNotFoundException(id + "item not found"));
+
+      String username = SecurityContextHolder
+              .getContext()
+              .getAuthentication()
+              .getName();
+UserProfile user=userProfileRepo.findById(id).orElseThrow(()->new UserNotFoundException(id+ "User not found"));
+      if (!user.getEmail().equals(username)) {
+         throw new AccessDeniedException(
+                 "You can update only your own item"
+         );
+      }
+
+      item.setItemName(newItem.getItemName());
+      item.setItemDesc(newItem.getItemDesc());
+      item.setStatus(Status.valueOf((newItem.getStatus().toLowerCase())));
+      item.setIsResolved( newItem.getIsResolved());
+      if(newItem.getIsResolved())
+         item.setResolvedAt(OffsetDateTime.now());
+      else item.setResolvedAt(null);
+
+      return(mapToResponseDto(itemRepo.save(item)));
 
    }
 

@@ -15,8 +15,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.security.core.context.SecurityContextHolder;
 import java.util.List;
 
 @RestController
@@ -36,16 +37,27 @@ public class InputController {
         return new ResponseEntity<>(itemService.createItem(item),HttpStatus.CREATED);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<ItemResponseDto> delete(@PathVariable Long id) {
         itemService.deleteItem(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-
+    @DeleteMapping("/delete/item/{id}")
+    public ResponseEntity<ItemResponseDto> deletef(@PathVariable Long id) {
+        itemService.deleteItemforUsers(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/update/{id}")
     public ResponseEntity<ItemResponseDto> update(@PathVariable Long id,@Valid @RequestBody CreateItemDto item){
 
 return new ResponseEntity<>(itemService.updateItem(id, item),HttpStatus.OK);
+    }
+    @PatchMapping("/update/user/{id}")
+    public ResponseEntity<ItemResponseDto> updateuser(@PathVariable Long id,@Valid @RequestBody CreateItemDto item){
+
+        return new ResponseEntity<>(itemService.updateItem(id, item),HttpStatus.OK);
     }
 
 @GetMapping("/listall")
