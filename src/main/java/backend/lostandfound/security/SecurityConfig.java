@@ -32,8 +32,11 @@ return new BCryptPasswordEncoder();
                                         "/main/"
                                 ).permitAll()
 
-
-
+                                .requestMatchers(
+                                        "/swagger-ui/**",
+                                        "/v3/api-docs/**",
+                                        "/swagger-ui.html"
+                                ).permitAll()
                                 .anyRequest().authenticated()
                         // Replace with your actual path
 
