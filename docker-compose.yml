@@ -1,0 +1,25 @@
+
+services:
+  backend:
+    image: justleviackermann/lostandfound:1.0
+    ports:
+      - "127.0.0.1:8080:8080"
+
+    environment:
+      DB_USERNAME: ${DBUSERNAME}
+      DB_PASSWORD: ${DBPASSWORD}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/landf
+    depends_on:
+      - "postgres"
+  postgres:
+    image: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${DBUSERNAME}
+      POSTGRES_PASSWORD: ${DBPASSWORD}
+      POSTGRES_DB: landf
+    volumes:
+      - my_db_data:/var/lib/postgresql
+volumes:
+  my_db_data: {}
