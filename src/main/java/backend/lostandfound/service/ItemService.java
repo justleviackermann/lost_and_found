@@ -54,8 +54,8 @@ public void deleteItem(Long id) throws UserNotFoundException{
               .getContext()
               .getAuthentication()
               .getName();
-      UserProfile user=userProfileRepo.findById(id).orElseThrow(()->new UserNotFoundException(id+ "User not found"));
-      if (!user.getEmail().equals(username)) {
+      UserProfile owner = item.getUserProfile();
+            if (!owner.getEmail().equals(username)) {
          throw new AccessDeniedException(
                  "You can delete only your own item"
          );
@@ -91,8 +91,9 @@ else item.setResolvedAt(null);
               .getContext()
               .getAuthentication()
               .getName();
-UserProfile user=userProfileRepo.findById(id).orElseThrow(()->new UserNotFoundException(id+ "User not found"));
-      if (!user.getEmail().equals(username)) {
+      UserProfile owner = item.getUserProfile();
+
+      if (!owner.getEmail().equals(username)) {
          throw new AccessDeniedException(
                  "You can update only your own item"
          );
@@ -122,8 +123,11 @@ public Page<ItemResponseDto> getAllItemsByPages(int page,int size){
 }
    private ItemTable mapFromCreateItem (CreateItemDto item) throws UserNotFoundException
    {
+      String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
       UserProfile user =userProfileRepo.findByregNo(item.getReporterRegNo()).orElseThrow(() -> new UserNotFoundException(item.getReporterRegNo() +" User not found"));
-
+      if (!user.getEmail().equals(currentUsername)) {
+         throw new AccessDeniedException("You cannot report an item on behalf of another registration number. identity theft leads to termination of account");
+      }
 
    return ItemTable.builder()
            .itemName(item.getItemName())

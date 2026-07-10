@@ -5,6 +5,7 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
@@ -13,9 +14,13 @@ import java.util.Date;
 
 @Component
 public class JwtUtils {
-    private final String SECRET="jdflidsjfskksddflkjsflijsfklrjflsdjflsdfjsdhslfjdhflsdfheslfhskldjfskdjfhjskdfhdskjfhdskfjdskjfdsfljdjflidjflsdjfl";
-private final long EXPIRATION_TIME=1000*60*60;
-private final Key SECRET_KEY= Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
+    private final Key SECRET_KEY;
+public JwtUtils(
+    @Value("${SECRET_KEY:jdflidsjfskksddflkjsflijsfklrjfl#@#$%#sdjflsdfjsdhslfjdhflsdfheslfhskldjfskdjfhjskdfhdskjfhdskfjdskjfdsfljdjflidjflsdjfl}")
+      String SECRET){
+
+    SECRET_KEY= Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));}
+    private final long EXPIRATION_TIME=1000*60*60;
 public String generateToken(String username, Long regNo, Role role){
     return Jwts.builder()
             .setSubject(username)

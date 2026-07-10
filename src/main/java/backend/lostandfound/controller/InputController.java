@@ -55,7 +55,7 @@ public class InputController {
 return new ResponseEntity<>(itemService.updateItem(id, item),HttpStatus.OK);
     }
     @PatchMapping("/update/user/{id}")
-    public ResponseEntity<ItemResponseDto> updateuser(@PathVariable Long id,@Valid @RequestBody CreateItemDto item){
+    public ResponseEntity<ItemResponseDto> updateItemforUsers(@PathVariable Long id,@Valid @RequestBody CreateItemDto item){
 
         return new ResponseEntity<>(itemService.updateItem(id, item),HttpStatus.OK);
     }

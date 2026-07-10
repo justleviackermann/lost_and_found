@@ -106,7 +106,15 @@ public List<UserResponseDto> listall(){
 }
 public UserResponseDto updatePassword(Long id,CreateUserDto newUser){
     UserProfile user=userProfileRepo.findById(id).orElseThrow(()->new UserNotFoundException(id+ "User not found"));
-
+    String username = SecurityContextHolder
+            .getContext()
+            .getAuthentication()
+            .getName();
+    if(!newUser.getEmail().equals(username)){
+        throw new AccessDeniedException(
+                "Please login to update your password or try to update only your password"
+        );
+    }
 
 String old=user.getPassword();
 if(passwordEncoder.matches( newUser.getPassword(),old))
